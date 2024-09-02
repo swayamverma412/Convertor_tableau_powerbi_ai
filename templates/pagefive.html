@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Images</title>
+    <link rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(245, 203, 66, 0.4);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f5cb42;
+        }
+
+        .nav-logo {
+            width: 50px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin-right: 20px;
+            font-size: 1.2em;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-profile span {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .profile-icon {
+            border-radius: 50%;
+            width: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin: 20px;
+        }
+
+        header h1 {
+            font-size: 2em;
+            color: #333;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            max-width: 800px;
+            background-color: rgba(245, 203, 66, 0.4);
+            border-radius: 20px;
+            padding: 80px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: auto;
+        }
+
+        form label {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        form input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .input-container div {
+            background-color: rgba(245, 203, 66, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            width: 45%;
+        }
+
+        input[type="file"] {
+            width: 100%;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: yellow;
+            color: black;
+        }
+
+        #file-upload {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <img src="../static/pwc_logo.png" alt="PWC Logo" class="nav-logo">
+    <div class="nav-links">
+        <a href="/pagetwo">Model Generator</a>
+        <a href="/pagethree" >Dax Generator</a>
+        <a href="/pagefour" >Report Generator</a>
+        <a href="/pagefive" class="active">Compare Images</a>
+    </div>
+    <div class="nav-profile">
+        <span>PWC</span>
+        <img src="https://via.placeholder.com/30" alt="Profile" class="profile-icon">
+    </div>
+</div>
+
+<main>
+    <header>
+        <h1>Compare Images</h1>
+    </header>
+    <form action="{{ url_for('result_images') }}" method="POST" enctype="multipart/form-data" onsubmit="showResults()">
+        <div class="input-container">
+            <div>
+                <label for="file1">Upload First Image or PDF:</label>
+                <input type="file" id="file1" name="file1" accept=".jpg,.jpeg,.png,.pdf" required>
+            </div>
+            <div>
+                <label for="file2">Upload Second Image or PDF:</label>
+                <input type="file" id="file2" name="file2" accept=".jpg,.jpeg,.png,.pdf" required>
+            </div>
+        </div>
+        <button type="submit">Compare</button>
+    </form>
+    <div id="result-section">
+
+    {% if similarity_score is not none %}
+        <h2>Similarity Score: {{ similarity_score }}</h2>
+        <p>Number of Differences Found: {{ num_differences }}</p>
+        <div>
+            <h3>Differences in Image 1:</h3>
+            <img src="{{ url_for('static', filename=diff_image1) }}" alt="Differences in Image 1">
+        </div>
+        <div>
+            <h3>Differences in Image 2:</h3>
+            <img src="{{ url_for('static', filename=diff_image2) }}" alt="Differences in Image 2">
+        </div>
+    {% endif %}
+
+    {% if error_message %}
+        <p style="color:red">{{ error_message }}</p>
+    {% endif %}
+</div>
+</main>
+</body>
+
+</html>

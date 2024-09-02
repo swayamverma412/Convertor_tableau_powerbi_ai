@@ -1,0 +1,31 @@
+// ER Diagram
+digraph {
+	"brands.csv" [label="brands.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"categories.csv" [label="categories.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"customers.csv" [label="customers.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"orders.csv" [label="orders.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"order_items.csv" [label="order_items.csv
+(Fact)" color=lightgray shape=box style=filled]
+	"products.csv" [label="products.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"staffs.csv" [label="staffs.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"stocks.csv" [label="stocks.csv
+(Fact)" color=lightgray shape=box style=filled]
+	"stores.csv" [label="stores.csv
+(Dimension)" color=lightgray shape=box style=filled]
+	"brands.csv" -> "products.csv" [label=brand_id]
+	"categories.csv" -> "products.csv" [label=category_id]
+	"customers.csv" -> "orders.csv" [label=customer_id]
+	"orders.csv" -> "order_items.csv" [label=order_id]
+	"products.csv" -> "order_items.csv" [label=product_id]
+	"products.csv" -> "stocks.csv" [label=product_id]
+	"staffs.csv" -> "orders.csv" [label=staff_id]
+	"stores.csv" -> "orders.csv" [label=store_id]
+	"stores.csv" -> "staffs.csv" [label=store_id]
+	"stores.csv" -> "stocks.csv" [label=store_id]
+}

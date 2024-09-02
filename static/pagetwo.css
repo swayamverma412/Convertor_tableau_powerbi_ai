@@ -1,0 +1,124 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f5cb42;
+}
+
+
+.nav-logo {
+    width: 50px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    margin-right: 20px;
+    font-size: 1.2em;
+}
+
+.nav-links a.active {
+    font-weight: bold;
+    border-bottom: 2px solid #333;
+}
+
+.nav-profile {
+    display: flex;
+    align-items: center;
+}
+
+.nav-profile span {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.profile-icon {
+    border-radius: 50%;
+    width: 30px;
+}
+
+.content {
+    padding: 20px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar input, .search-bar select , option {
+    padding: 10px;
+    border: 1px solid black;
+    color: #333;
+    border-radius: 5px;
+    width: 200px;
+}
+
+option{
+    color: #333;
+}
+
+.position-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.position-table th, .position-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.position-table th {
+    background-color: #f5f5f5;
+}
+
+.position-table td a {
+    color: #f5cb42;
+    text-decoration: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination span {
+    font-size: 1em;
+}
+
+.pages a {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
+.pages a.active {
+    background-color: #f5cb42;
+    color: white;
+    border-color: #f5cb42;
+}
+
+.pages a:hover {
+    background-color: #ddd;
+}
+
+.pagination select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

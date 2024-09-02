@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <link rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f5cb42;
+        }
+
+        .nav-logo {
+            width: 50px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin-right: 20px;
+            font-size: 1.2em;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-profile span {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .profile-icon {
+            border-radius: 50%;
+            width: 30px;
+        }
+
+        /* Chatbot Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 20px;
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-message {
+            background-color: #d1e7ff;
+            align-self: flex-end;
+            color: black;
+        }
+
+        .bot-message {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+            color: black;
+        }
+
+        .message img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .message-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            justify-content: center;
+            text-align: center;
+            background-color: white;
+            border-top: 1px solid #ccc;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .upload-button {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .upload-button:hover {
+            background-color: yellow;
+            color: black;
+        }
+
+        .send-button {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: yellow;
+            color: black;
+        }
+
+        /* Hide the actual file input */
+        #file-upload {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+   <!-- Navbar -->
+   <div class="navbar">
+        <img src="../static/pwc_logo.png" alt="PWC Logo" class="nav-logo">
+        <div class="nav-links">
+            <a href="/pagetwo">Model Generator</a>
+            <a href="/pagethree">Dax Generator</a>
+            <a href="/pagefour" class="active">Report Generator</a>
+            <a href="/pagefive">Compare Images</a>
+        </div>
+        <div class="nav-profile">
+            <span>PWC</span>
+            <img src="https://via.placeholder.com/30" alt="Profile" class="profile-icon">
+        </div>
+    </div>
+
+    <!-- Chatbot Interface -->
+    <div class="chat-container" id="chat-container">
+        <!-- Chat messages go here -->
+        <div class="message bot-message">
+            Hello! What can I help you with?
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="message-input-container">
+        <form id="upload-form" action="/generate_image" method="post" enctype="multipart/form-data">
+            <label for="file-upload" class="upload-button">Upload Image</label>
+            <input type="file" id="file-upload" name="file">
+            <button type="button" class="send-button" onclick="uploadImage()">Send</button>
+        </form>
+    </div>
+
+    <script>
+        function uploadImage() {
+            const form = document.getElementById('upload-form');
+            const formData = new FormData(form);
+
+            fetch('/generate_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.text && data.image_url) {
+                    const chatContainer = document.getElementById('chat-container');
+
+                    // Append user message with image
+                    const userMessage = document.createElement('div');
+                    userMessage.className = 'message user-message';
+                    userMessage.innerHTML = `<img src="${data.image_url}" alt="Uploaded Image">`;
+                    chatContainer.appendChild(userMessage);
+
+                    // Append bot response
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot-message';
+                    botMessage.innerHTML = `<p>${data.text}</p>`;
+                    chatContainer.appendChild(botMessage);
+
+                    // Scroll to the bottom
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else {
+                    alert('Failed to process image');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the image.');
+            });
+        }
+    </script>
+
+</body>
+</html>

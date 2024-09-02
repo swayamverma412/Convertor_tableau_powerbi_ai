@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI Transition Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Add your custom styles here */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #primary-keys, #primary-keys-id, #er-diagram {
+            margin-top: 20px;
+        }
+        #er-diagram img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        #download-btn {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header style="text-align: center;">
+        <h1>BI Transition Tool</h1>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Effortless Migration. Powerful Insights.</h2>
+            <p>Seamlessly convert your Tableau dashboards to Power BI with our intuitive tools.</p>
+            <form class="form-horizontal" action="" method="POST" enctype="multipart/form-data" id="upload-form">
+                <center>
+                    <input onchange="enableButton();" type="file" name="files[]" id="csv-upload" accept=".csv" multiple>
+                    <br><br>
+                    <button type="submit" class="btn btn-primary" id="get-started-btn" disabled>Get Started</button>
+                    <button type="button" class="btn btn-danger" id="delete-files-btn" onclick="deleteFiles();">Refresh</button>
+                </center>
+            </form>
+            <div id="status-message"></div>
+            <div id="primary-keys"></div>
+            <div id="primary-keys-id"></div>
+            <div id="er-diagram" style="margin-top: 20px;">
+                <div id="er-diagram-container"></div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>Simplify Your Data Journey</h2>
+            <div class="feature-card">
+                <h3>ER Diagram Generator</h3>
+                <p>Upload your CSV and generate a clear visual representation of your data relationships.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Chatbot-Powered Conversion</h3>
+                <p>Our AI assistant helps you translate Tableau calculated fields to equivalent DAX expressions.</p>
+            </div>
+        </section>
+
+        <section id="how-it-works">
+            <h2>How it Works</h2>
+            <div class="step">
+                <h3>1. Primary Key</h3>
+                <p>Start by uploading your CSV files and click on <i>Get Started</i> to obtain the potential primary keys.</p>
+            </div>
+            <div class="step">
+                <h3>2. Entity Relationship Diagram</h3>
+                <p>Our tool automatically generates an ER diagram for your files that can be downloaded by clicking on the link.</p>
+            </div>
+            <div class="step">
+                <h3>3. Calculated Field Conversion</h3>
+                <p>Use our AI assistant to effortlessly convert your Tableau calculated fields to Power BI DAX.</p>
+            </div>
+        </section>
+
+        <section id="chatbot">
+            <h2>DAX Generator</h2>
+            <div id="chatbox">
+                <div id="messages"></div>
+                <form id="chat-form">
+                    <input type="text" id="chat-input" placeholder="Enter your calculated field expression..." required>
+                    <button type="submit" id="send-btn">Convert</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Get in Touch</h2>
+            <p>Have questions? Reach out to our team for expert assistance.</p>
+            <a href="mailto:support@yourcompany.com">Contact Us</a>
+        </section>
+
+    </main>
+
+    <script>
+        function enableButton() {
+            document.getElementById('get-started-btn').disabled = false;
+        }
+
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('csv-upload');
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files[]', fileInput.files[i]);
+            }
+
+            fetch('{{ url_for("upload_csv") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message.includes('successfully uploaded')) {
+                    fetch('{{ url_for("generate_er_diagram_route") }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const primaryKeys = data.primary_keys;
+                        const primaryKeysDiv = document.getElementById('primary-keys');
+                        const primaryKeysIdDiv = document.getElementById('primary-keys-id');
+                        primaryKeysDiv.innerHTML = '<h3>Candidate Keys:</h3>';
+                        primaryKeysIdDiv.innerHTML = '<h3>Primary Keys:</h3>';
+                        for (const [file, keys] of Object.entries(primaryKeys)) {
+                            primaryKeysDiv.innerHTML += `<p><strong>${file}</strong>: ${keys.join(', ')}</p>`;
+                            const idKeys = keys.filter(key => key.endsWith('id'));
+                            primaryKeysIdDiv.innerHTML += `<p><strong>${file}</strong>: ${idKeys.join(', ')}</p>`;
+                        }
+
+                        // Display ER diagram on the page
+                        const erDiagramContainer = document.getElementById('er-diagram-container');
+                        erDiagramContainer.innerHTML = '<h3>Entity Relationship Diagram:</h3>';
+                        const img = document.createElement('img');
+                        img.src = '{{ url_for("serve_er_diagram_png") }}';
+                        img.alt = 'ER Diagram';
+                        img.style.maxWidth = '100%';
+                        img.style.height = 'auto';
+                        erDiagramContainer.appendChild(img);
+
+                        // Create and append download button
+                        const downloadBtn = document.createElement('button');
+                        downloadBtn.textContent = 'Download ER Diagram';
+                        downloadBtn.className = 'btn btn-primary';
+                        downloadBtn.id = 'download-btn';
+                        downloadBtn.onclick = function() {
+                            downloadERDiagram('{{ url_for("serve_er_diagram_png") }}');
+                        };
+                        erDiagramContainer.appendChild(downloadBtn);
+
+                        document.getElementById('status-message').innerText = '';
+                    })
+                    .catch(error => {
+                        document.getElementById('status-message').innerText = 'Failed to generate ER diagram.';
+                    });
+                } else {
+                    document.getElementById('status-message').innerText = data.message;
+                }
+            })
+            .catch(error => {
+                document.getElementById('status-message').innerText = 'An error occurred while uploading the file.';
+            });
+        });
+
+        function downloadERDiagram(url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'er_diagram.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        let chatId = null;
+
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value;
+            chatInput.value = '';
+
+            if (!chatId) {
+                fetch('/start_chat', {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    chatId = data.chat_id;
+                    sendMessage(chatId, message);
+                })
+                .catch(error => {
+                    displayMessage('Error starting chat.');
+                });
+            } else {
+                sendMessage(chatId, message);
+            }
+        });
+
+        function sendMessage(chatId, message) {
+            fetch('/convert_expression', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ chat_id: chatId, message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage('Input: ' + message);
+                displayMessage('Output: ' + data.dax_expression);
+            })
+            .catch(error => {
+                displayMessage('Error sending message.');
+            });
+        }
+
+        function displayMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            messagesDiv.appendChild(messageElement);
+        }
+
+        function deleteFiles() {
+            fetch('{{ url_for("delete_files") }}', {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status-message').innerText = data.message;
+                document.getElementById('primary-keys').innerHTML = '';
+                document.getElementById('primary-keys-id').innerHTML = '';
+                document.getElementById('csv-upload').value = '';
+                document.getElementById('get-started-btn').disabled = true;
+
+                // Remove ER diagram and download button from page
+                const erDiagramContainer = document.getElementById('er-diagram-container');
+                erDiagramContainer.innerHTML = '';
+            })
+            .catch(error => {
+                document.getElementById('status-message').innerText = 'Failed to delete files.';
+            });
+        }
+    </script>
+</body>
+</html>

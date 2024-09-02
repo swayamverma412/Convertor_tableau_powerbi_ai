@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dax Generator</title>
+    <style>
+        /* Styling for the overall layout and appearance */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f5cb42;
+        }
+
+        .nav-logo {
+            width: 50px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin-right: 20px;
+            font-size: 1.2em;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+        }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-profile span {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .profile-icon {
+            border-radius: 50%;
+            width: 30px;
+        }
+
+        /* Chatbot Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 20px;
+            max-width: 70%;
+        }
+
+        .user-message {
+            background-color: #d1e7ff;
+            align-self: flex-end;
+            color: black;
+        }
+
+        .bot-message {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+            color: black;
+        }
+
+        .message-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            border-top: 1px solid #ccc;
+        }
+
+        .message-select {
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .send-button {
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: yellow;
+            color: black;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <img src="../static/pwc_logo.png" alt="PWC Logo" class="nav-logo">
+        <div class="nav-links">
+            <a href="/pagetwo">Model Generator</a>
+            <a href="/pagethree" class="active">Dax Generator</a>
+            <a href="/pagefour">Report Generator</a>
+            <a href="/pagefive">Compare Images</a>
+        </div>
+        <div class="nav-profile">
+            <span>PWC</span>
+            <img src="https://via.placeholder.com/30" alt="Profile" class="profile-icon">
+        </div>
+    </div>
+
+    <!-- Chatbot Interface -->
+    <div class="chat-container" id="chat-container">
+        <!-- Initial bot message -->
+        <div class="message bot-message">
+            Hello! Enter your query?
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="message-input-container">
+        <select id="conversion-type" class="message-select">
+            <option value="DAX to Tableau">DAX to Tableau</option>
+            <option value="Tableau to PowerBI">Tableau to PowerBI</option>
+        </select>
+        <input type="text" id="user-input" class="message-input" placeholder="Type your message here...">
+        <button class="send-button" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const conversionType = document.getElementById('conversion-type').value;
+            const userInput = document.getElementById('user-input').value;
+
+            // Append the user's message to the chat container
+            const messageContainer = document.getElementById('chat-container');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = userInput;
+            messageContainer.appendChild(userMessage);
+
+            // Scroll to the latest message
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            fetch('/convert_expression', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: '',  // Include chat_id if necessary
+                    message: userInput,
+                    conversion_type: conversionType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                
+                if (data.dax_expression) {
+                    botMessage.textContent = data.dax_expression;
+                } else {
+                    botMessage.textContent = 'Sorry, I couldn\'t process that.';
+                }
+
+                // Append the bot's response to the chat container
+                messageContainer.appendChild(botMessage);
+
+                // Scroll to the latest message
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            });
+
+            // Clear the input field
+            document.getElementById('user-input').value = '';
+        }
+    </script>
+</body>
+</html>
